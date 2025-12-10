@@ -17,10 +17,10 @@ x CVD
 Question 3
 10 / 10 pts
 Which of the following materials sputters at the highest rate in an Ar plasma?
-x Ag
-  Au
-  Si
-  Mo
+x Ag (Silver)
+  Au (Gold)
+  Si (Silicon)
+  Mo (Molybdenum)
 
 Question 4
 10 / 10 pts

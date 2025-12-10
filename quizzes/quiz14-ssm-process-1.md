@@ -32,6 +32,6 @@ What is the primary purpose of the SacOx2 layer in the SUMMiT V process?
 Question 5
 10 / 10 pts
 What process step is used to create flat SacOx 3 and SacOx4 layers?
-  ALD
-  SEM
-x CMP
+  ALD (Atomic Layer Deposition)
+  SEM (Scanning Electron Microscopy)
+x CMP (Chemical Mechanical Planarization)

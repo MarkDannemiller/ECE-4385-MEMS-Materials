@@ -17,7 +17,7 @@ x Larry Hornbeck, 1987
 Question 3
 10 / 10 pts
 What is the approximate size of a single micromirror in a DMD array?
-  0.5 μm
+x 0.5 μm
   50 μm
   500 μm
 
