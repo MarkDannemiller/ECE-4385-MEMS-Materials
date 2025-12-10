@@ -108,11 +108,11 @@ To improve optical reflection from the surface
 
 Question 15
 10 / 10 pts
-When growing SiO₂ using either a dry or wet oxidation process, the typical temperature required is:
-1000 °C
+When growing SiO₂ using either a dry or wet oxidation process, the typical temperature required is ___ C:
+1000
 Room Temperature
-100 °C
-x 500 °C
+100
+x 500
 
 Question 16
 10 / 10 pts

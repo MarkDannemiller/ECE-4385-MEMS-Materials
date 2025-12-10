@@ -25,7 +25,7 @@ x atomic layer deposition
 Question 4
 10 / 10 pts
 What is the primary purpose of the SacOx2 layer in the SUMMiT V process?
-  rotor-stator separation in gear hubs
+x rotor-stator separation in gear hubs
   lamination of poly2 to poly 3
   anti-stiction barrier
 

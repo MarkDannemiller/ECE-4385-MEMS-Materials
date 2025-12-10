@@ -112,11 +112,11 @@ To improve optical reflection from the surface
 
 Question 15
 10 / 10 pts
-When growing SiO₂ using either a dry or wet oxidation process, the typical temperature required is:
-1000 °C
+When growing SiO₂ using either a dry or wet oxidation process, the typical temperature required is ___ C:
+1000
 Room Temperature
-100 °C
-x 500 °C
+100
+x 500
 
 Question 16
 10 / 10 pts
@@ -372,7 +372,7 @@ x atomic layer deposition
 Question 4
 10 / 10 pts
 What is the primary purpose of the SacOx2 layer in the SUMMiT V process?
-  rotor-stator separation in gear hubs
+x rotor-stator separation in gear hubs
   lamination of poly2 to poly 3
   anti-stiction barrier
 
@@ -1438,9 +1438,9 @@ Question 4
 10 / 10 pts
 In ANSYS terminology, what is meant by “loads”?
 x Boundary conditions and externally or internally applied forcing functions
-Only externally applied mechanical forces
-Only thermal boundary conditions such as fixed temperatures
-Only electrical voltages applied at nodes
+Externally applied mechanical forces
+Thermal boundary conditions such as fixed temperatures
+Electrical voltages applied at nodes based on meshed result.
 
 Question 5
 10 / 10 pts
@@ -1524,7 +1524,7 @@ Which tools are commonly used to characterize nano-coated surfaces and their pro
 x Contact angle goniometer and SEM
 x TEM and XPS
 x AFM for topography and force–distance measurements
-Wire-bond pull tester only
+Wire-bond pull tester
 
 Question 10
 10 / 10 pts

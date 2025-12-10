@@ -26,9 +26,9 @@ Question 4
 10 / 10 pts
 In ANSYS terminology, what is meant by “loads”?
 x Boundary conditions and externally or internally applied forcing functions
-Only externally applied mechanical forces
-Only thermal boundary conditions such as fixed temperatures
-Only electrical voltages applied at nodes
+Externally applied mechanical forces
+Thermal boundary conditions such as fixed temperatures
+Electrical voltages applied at nodes based on meshed result.
 
 Question 5
 10 / 10 pts

@@ -68,7 +68,7 @@ Which tools are commonly used to characterize nano-coated surfaces and their pro
 x Contact angle goniometer and SEM
 x TEM and XPS
 x AFM for topography and force–distance measurements
-Wire-bond pull tester only
+Wire-bond pull tester
 
 Question 10
 10 / 10 pts
