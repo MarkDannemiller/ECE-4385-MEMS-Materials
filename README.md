@@ -11,6 +11,7 @@ This repo contains practice quizzes for the Texas Tech ECE 4385 MEMS course and 
 - `quiz_app.py` loads all quizzes, shuffles questions, and runs them in the terminal.
 - Supports arrow keys **or** number keys to choose answers; space toggles on select-all; Enter submits; `q` quits.
 - Fill-in questions prompt for text; feedback shows correct/incorrect plus the right answer(s).
+- Feel free to delete/move quizzes from the `quizzes/` and `generated-quizzes/` folders if you are studying for the midterm and need a reduced set of material.
 
 ## Usage
 ```bash
