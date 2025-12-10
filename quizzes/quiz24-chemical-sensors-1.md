@@ -1,38 +1,38 @@
 Question 1
 10 / 10 pts
-How does pulse-width modulation (PWM) create grayscale images in DLP systems?
-x By switching mirrors on and off for different durations within a frame
-  By varying the light wavelength
-  By adjusting the mirror angle continuously
-  By changing the mirror size dynamically
+Which of the following is not a key goal of chemical sensing?
+  Sensitivity
+  Specificity
+  Durability
+x Transparency
 
 Question 2
 10 / 10 pts
-Which property is measured using the Zygo NewView Scanning White Light Interferometer during DMD testing?
-  Optical reflectivity
-x Vertical displacement and surface profile
-  Thermal expansion coefficient
-  Electrostatic charge distribution
+What property of a Nafion-based humidity sensor changes due to absorbed water?
+  Capacitance
+  Thermal conductivity
+  Optical transparency
+x Resistivity
 
 Question 3
 10 / 10 pts
-What manufacturing technique is used to create the micromirrors and their support structures?
-  Ion implantation
-  CVD on silicon wafers
-x Plasma etching with sacrificial layer removal
-  Laser lithography
+What is the typical response time (rise and fall) for a Nafion-based humidity sensor?
+  Rise: 500–1000 ms, Fall: 200–300 ms
+x Rise: 50–100 ms, Fall: 20–30 ms
+  Rise: 1–5 s, Fall: 0.5–2 s
+  Rise: 10–20 ms, Fall: 1–2 ms
 
 Question 4
 10 / 10 pts
-Why was surface micromachining essential for the development of the DMD?
-  It allowed creation of curved mirrors for better reflection.
-x It enabled batch fabrication of movable microstructures on CMOS circuitry.
-  It allowed mirrors to rotate continuously.
-  It reduced the power requirements of the light source.
+What is the primary purpose of the Teflon (tetrafluoroethylene) backbone in the Nafion polymer used for humidity sensors?
+  It enhances the electrical conductivity of the sensor.
+  It acts as a catalyst for water dissociation.
+x It provides structural support and chemical stability.
+  It increases the optical absorption of water molecules.
 
 Question 5
 10 / 10 pts
-What mechanical structure allows each micromirror to tilt between its two stable positions?
-x Flexure hinges with torsion beams
-  Electrostatic comb drive
-  Piezoelectric actuator arms
+What happens to the current through a Nafion-based humidity sensor as relative humidity increases?
+  It oscillates periodically due to hysteresis.
+x It increases because absorbed water produces more ions.
+  It remains constant once a threshold voltage is reached.
