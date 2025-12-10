@@ -21,3 +21,7 @@ python quiz_app.py
 ## Notes
 - Requires Python 3 (no external packages).
 - Runs best in a terminal window; on Windows, arrow keys and number keys work via `msvcrt`.
+
+## Additional
+Here is a link to a GPT that may work to help you study, asking the questions from this repo:
+https://chatgpt.com/g/g-6939b02a55a88191af0e5eb485cf39c3-mems-ece-4385-study-assistant
