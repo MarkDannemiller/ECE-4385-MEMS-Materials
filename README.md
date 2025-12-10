@@ -3,7 +3,7 @@
 This repo contains practice quizzes for the Texas Tech ECE 4385 MEMS course and a small interactive study app.
 
 ## Quizzes
-- Stored in `quizzes/quiz*.md`; each file mirrors a course quiz.
+- Stored in `quizzes/quiz*.md`; each file mirrors a course quiz. Generated sets live in `generated-quizzes/`.
 - Correct options are marked with a leading `x`, and select-all questions keep multiple `x` marks.
 - Some quizzes include fill-in-the-blank entries (e.g., `quiz26-nanotechnology.md`).
 

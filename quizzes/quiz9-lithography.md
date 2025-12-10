@@ -8,7 +8,7 @@ x mineral spirits
 
 Question 2
 10 / 10 pts
-Which of the following is not a tryp of lithography tool?
+Which of the following is not a type of lithography tool?
 x annealer
   stepper
   aligner

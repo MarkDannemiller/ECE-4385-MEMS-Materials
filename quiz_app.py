@@ -8,10 +8,32 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Set
 
+try:  # optional color support
+    import colorama
+
+    colorama.just_fix_windows_console()
+except Exception:
+    colorama = None
+
+
+class Colors:
+    GREEN = "\033[92m"
+    RED = "\033[91m"
+    CYAN = "\033[96m"
+    YELLOW = "\033[93m"
+    GRAY = "\033[90m"
+    BOLD = "\033[1m"
+    RESET = "\033[0m"
+
+
+def color(text: str, code: str) -> str:
+    return f"{code}{text}{Colors.RESET}"
+
 
 @dataclass
 class Question:
     prompt: str
+    display_prompt: str
     options: List[str]
     correct_indices: Set[int]
     kind: str  # "single", "multi", "fill"
@@ -28,6 +50,8 @@ def read_key() -> str | None:
         import msvcrt
 
         ch = msvcrt.getch()
+        if ch == b"\x03":  # Ctrl+C
+            raise KeyboardInterrupt
         if ch in (b"\x00", b"\xe0"):
             ch = msvcrt.getch()
             return {
@@ -54,6 +78,8 @@ def read_key() -> str | None:
     try:
         tty.setraw(fd)
         ch = sys.stdin.read(1)
+        if ch == "\x03":  # Ctrl+C
+            raise KeyboardInterrupt
         if ch == "\x1b":
             seq = sys.stdin.read(2)
             if seq == "[A":
@@ -78,14 +104,20 @@ def read_key() -> str | None:
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
 
-def wait_for_continue() -> None:
+def wait_for_continue(message: str | None = None) -> None:
     if os.name == "nt":
         import msvcrt
 
-        print("\nPress any key for the next question...", end="", flush=True)
-        msvcrt.getch()
+        if message:
+            print(message, end="", flush=True)
+        ch = msvcrt.getch()
+        if ch == b"\x03":
+            raise KeyboardInterrupt
     else:
-        input("\nPress Enter for the next question...")
+        if message:
+            input(message)
+        else:
+            input()
 
 
 def normalize_prompt(lines: List[str]) -> str:
@@ -151,9 +183,22 @@ def parse_quiz_file(path: Path) -> List[Question]:
 
         prompt = normalize_prompt(prompt_lines)
         kind = detect_kind(prompt, options, correct_indices)
+
+        display_prompt = prompt
+        if kind == "fill":
+            correct_answer = options[0] if options else ""
+            if prompt.lower().strip() in {"fill in the blank", ""}:
+                masked = (
+                    " ".join("_" * len(word) for word in correct_answer.split())
+                    if correct_answer
+                    else "________"
+                )
+                display_prompt = f"Fill in the blank: {masked}"
+
         questions.append(
             Question(
                 prompt=prompt,
+                display_prompt=display_prompt,
                 options=options,
                 correct_indices=correct_indices,
                 kind=kind,
@@ -166,43 +211,100 @@ def parse_quiz_file(path: Path) -> List[Question]:
 
 def load_all_questions(quizzes_dir: Path) -> List[Question]:
     questions: List[Question] = []
-    for file_path in sorted(quizzes_dir.glob("quiz*.md")):
-        questions.extend(parse_quiz_file(file_path))
+    search_dirs = [quizzes_dir, quizzes_dir.parent / "generated-quizzes"]
+    for directory in search_dirs:
+        if not directory.exists():
+            continue
+        for file_path in sorted(directory.glob("quiz*.md")):
+            questions.extend(parse_quiz_file(file_path))
+    for q in questions:
+        shuffle_choices(q)
     return questions
 
 
+def shuffle_choices(question: Question) -> None:
+    """Shuffle answer choices while preserving correct indices."""
+    if question.kind == "fill":
+        return
+    order = list(range(len(question.options)))
+    random.shuffle(order)
+    new_options = [question.options[i] for i in order]
+    new_correct = {new_idx for new_idx, old_idx in enumerate(order) if old_idx in question.correct_indices}
+    question.options = new_options
+    question.correct_indices = new_correct
+
+
 def render_question(
-    question: Question, pointer: int, picked: Set[int], total: int, idx: int
+    question: Question,
+    pointer: int,
+    picked: Set[int],
+    total: int,
+    idx: int,
+    phase: str = "ask",
+    user_selection: Set[int] | None = None,
+    was_correct: bool | None = None,
 ) -> None:
     clear_screen()
     header = f"Question {idx + 1} of {total} ({question.source})"
-    print(header)
-    print("-" * len(header))
-    print(question.prompt)
+    print(color(header, Colors.BOLD + Colors.CYAN))
+    print(color("-" * len(header), Colors.CYAN))
+    prompt_text = question.display_prompt if hasattr(question, "display_prompt") else question.prompt
+    print(color(prompt_text, Colors.YELLOW + Colors.BOLD))
+    print()
+        
 
     if question.kind == "fill":
-        print("\nType your answer and press Enter to confirm.")
+        if phase == "feedback":
+            instructions = "(Press any key to continue.)"
+        else:
+            instructions = "(Type your answer and press Enter to confirm.)"
+        print(color(instructions, Colors.GRAY))
         return
-
-    print("\nUse arrow keys or numbers to move, Enter to submit.")
-    if question.kind == "multi":
-        print("Space toggles selections for select-all questions.")
 
     for i, option in enumerate(question.options):
         marker = ">"
+        is_selected = (
+            i in picked if phase == "ask" else (user_selection is not None and i in user_selection)
+        )
+
+        caret = color(marker, Colors.CYAN) if (phase == "ask" and i == pointer) else " "
+        selection_tag = ""
         if question.kind == "multi":
-            selected = "[x]" if i in picked else "[ ]"
-            caret = marker if i == pointer else " "
-            print(f"{caret} {i+1}. {selected} {option}")
-        else:
-            caret = marker if i == pointer else " "
-            print(f"{caret} {i+1}. {option}")
+            selection_tag = "[x]" if is_selected else "[ ]"
+
+        line = f"{caret} {i+1}. {selection_tag + ' ' if selection_tag else ''}{option}"
+
+        line_color = None
+        if phase == "feedback":
+            if i in question.correct_indices:
+                line_color = Colors.GREEN
+            elif is_selected:
+                line_color = Colors.RED
+
+        if phase == "ask" and i == pointer:
+            line_color = Colors.CYAN
+
+        print(color(line, line_color) if line_color else line)
+
+    print()
+    if phase == "feedback":
+        instructions = "(Press any key to continue.)"
+    elif question.kind == "multi":
+        instructions = "(Use arrow keys or numbers to choose; Space toggles; Enter submits; q quits.)"
+    else:
+        instructions = "(Use arrow keys or numbers to choose; Enter submits; q quits.)"
+    print(color(instructions, Colors.GRAY))
+
+    if phase == "feedback" and was_correct is not None:
+        status_text = "Correct!" if was_correct else "Incorrect."
+        status_color = Colors.GREEN if was_correct else Colors.RED
+        print(color(status_text, status_color))
 
 
-def ask_fill_in(question: Question) -> bool:
+def ask_fill_in(question: Question) -> tuple[bool, str]:
     user_input = input("\nYour answer: ").strip()
     correct_answer = question.options[0].strip()
-    return user_input.lower() == correct_answer.lower()
+    return user_input.lower() == correct_answer.lower(), user_input
 
 
 def ask_multiple_choice(
@@ -240,40 +342,69 @@ def ask_multiple_choice(
             return None
 
 
-def ask_question(question: Question, idx: int, total: int) -> bool | None:
+def ask_question(
+    question: Question, idx: int, total: int
+) -> tuple[bool | None, Set[int] | str | None]:
     if question.kind == "fill":
         clear_screen()
         header = f"Question {idx + 1} of {total} ({question.source})"
-        print(header)
-        print("-" * len(header))
-        print(question.prompt)
-        print("\nFill in the blank and press Enter to confirm.")
-        user_correct = ask_fill_in(question)
-        return user_correct
+        print(color(header, Colors.BOLD + Colors.CYAN))
+        print(color("-" * len(header), Colors.CYAN))
+        prompt_text = question.display_prompt if hasattr(question, "display_prompt") else question.prompt
+        print(color(prompt_text, Colors.YELLOW + Colors.BOLD))
+        print()
+        print(color("(Type your answer and press Enter to confirm.)", Colors.GRAY))
+        user_correct, user_input = ask_fill_in(question)
+        return user_correct, user_input
 
     selected = ask_multiple_choice(question, idx=idx, total=total)
     if selected is None:
-        return None
-    return selected == question.correct_indices
+        return None, None
+    return selected == question.correct_indices, selected
 
 
-def show_feedback(question: Question, correct: bool, user_selection: Set[int] | None) -> None:
-    clear_screen()
-    print("Correct!" if correct else "Incorrect.")
-
+def show_feedback(
+    question: Question,
+    correct: bool,
+    user_response: Set[int] | str | None,
+    idx: int,
+    total: int,
+) -> None:
     if question.kind == "fill":
-        answer_text = question.options[0]
-        print(f"Correct answer: {answer_text}")
-    else:
-        correct_answers = [question.options[i] for i in sorted(question.correct_indices)]
-        print("Correct answer(s):")
-        for opt in correct_answers:
-            print(f"- {opt}")
-        if user_selection is not None:
-            user_answers = [question.options[i] for i in sorted(user_selection)]
-            print("\nYour answer:")
-            for opt in user_answers:
-                print(f"- {opt}")
+        clear_screen()
+        header = f"Question {idx + 1} of {total} ({question.source})"
+        print(color(header, Colors.BOLD + Colors.CYAN))
+        print(color("-" * len(header), Colors.CYAN))
+        status_text = "Correct!" if correct else "Incorrect."
+        status_color = Colors.GREEN if correct else Colors.RED
+        print(color(status_text, status_color))
+        prompt_text = question.display_prompt if hasattr(question, "display_prompt") else question.prompt
+        print(color(prompt_text, Colors.YELLOW + Colors.BOLD))
+        print()
+
+        user_text = user_response if isinstance(user_response, str) else ""
+        if correct:
+            print(color(f"Your answer: {user_text}", Colors.GREEN))
+        else:
+            print(color(f"Your answer: {user_text}", Colors.RED))
+            correct_answer = question.options[0]
+            print(color(f"Correct answer: {correct_answer}", Colors.GREEN))
+
+        print()
+        print(color("(Press any key to continue.)", Colors.GRAY))
+        return
+
+    selection_set = user_response if isinstance(user_response, set) else set()
+    render_question(
+        question=question,
+        pointer=-1,
+        picked=selection_set,
+        total=total,
+        idx=idx,
+        phase="feedback",
+        user_selection=selection_set,
+        was_correct=correct,
+    )
 
 
 def main() -> None:
@@ -291,23 +422,20 @@ def main() -> None:
     random.shuffle(questions)
 
     for idx, question in enumerate(questions):
-        if question.kind == "fill":
-            user_correct = ask_question(question, idx, len(questions))
-            user_selection: Set[int] | None = None
-        else:
-            selection = ask_multiple_choice(
-                question, idx=idx, total=len(questions)
-            )
-            if selection is None:
-                print("\nExiting...")
-                break
-            user_selection = selection
-            user_correct = selection == question.correct_indices
-
+        user_correct, user_response = ask_question(
+            question, idx=idx, total=len(questions)
+        )
         if user_correct is None:
+            print("\nExiting...")
             break
 
-        show_feedback(question, bool(user_correct), user_selection)
+        show_feedback(
+            question,
+            bool(user_correct),
+            user_response,
+            idx=idx,
+            total=len(questions),
+        )
         wait_for_continue()
 
 
