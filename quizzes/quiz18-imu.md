@@ -9,9 +9,9 @@ x Texas Instruments
 Question 2
 10 / 10 pts
 Which MEMS devices are found in smart phones? Select all that apply.
-  Accelerometer
-  Gyroscope
-  Magnetometer
+x Accelerometer
+x Gyroscope
+x Magnetometer
 x Pressure
 
 Question 3
@@ -33,7 +33,7 @@ x 1,000,000,000,000
 Question 5
 10 / 10 pts
 Which of the following reasons explain why MEMS sensors are now ubiquitous? (select all tha apply)
-  batch production
-  compact
+x batch production
+x compact
 x high sensitivity
   low repeatability

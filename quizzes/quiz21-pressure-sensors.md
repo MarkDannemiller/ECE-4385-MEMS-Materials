@@ -1,9 +1,9 @@
 Question 1
 10 / 10 pts
 Which of the following transduction methods can be used to measure pressure? (check all that apply)
-  piezoelectric
-  capacitive
-  piezoresistive
+x piezoelectric
+x capacitive
+x piezoresistive
 x metal strain
 
 Question 2

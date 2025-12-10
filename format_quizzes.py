@@ -60,7 +60,7 @@ def parse_unformatted_quiz(content):
                 'num': q_num,
                 'text': q_text,
                 'options': [],
-                'correct': None
+                'correct': set()  # Use set to track multiple correct answers
             }
             continue
         
@@ -78,7 +78,7 @@ def parse_unformatted_quiz(content):
             if i + 1 < len(lines):
                 correct_text = lines[i + 1].strip()
                 if correct_text and current_q:
-                    current_q['correct'] = correct_text
+                    current_q['correct'].add(correct_text)  # Add to set
                     if correct_text not in current_q['options']:
                         current_q['options'].append(correct_text)
                 i += 2  # Skip the answer text line
@@ -108,7 +108,7 @@ def parse_unformatted_quiz(content):
                     'num': 1,
                     'text': line,
                     'options': [],
-                    'correct': None
+                    'correct': set()  # Use set to track multiple correct answers
                 }
                 i += 1
                 continue
@@ -138,7 +138,7 @@ def parse_formatted_quiz(content):
             'num': 1,
             'text': first_line,
             'options': [],
-            'correct': None
+            'correct': set()  # Use set to track multiple correct answers
         }
         i = 1
         
@@ -165,7 +165,7 @@ def parse_formatted_quiz(content):
             if opt_line.startswith('x '):
                 opt = opt_line[2:].rstrip()
                 current_q['options'].append(opt)
-                current_q['correct'] = opt
+                current_q['correct'].add(opt)  # Add to set of correct answers
             elif opt_line.startswith('  ') and len(opt_stripped) > 0:
                 opt = opt_line[2:].rstrip()
                 current_q['options'].append(opt)
@@ -210,7 +210,7 @@ def parse_formatted_quiz(content):
                 'num': q_num,
                 'text': q_text,
                 'options': [],
-                'correct': None
+                'correct': set()  # Use set to track multiple correct answers
             }
             
             # Collect options until we hit a blank line followed by "Question" or end
@@ -239,7 +239,7 @@ def parse_formatted_quiz(content):
                 if opt_line.startswith('x '):
                     opt = opt_line[2:].rstrip()  # Remove leading "x " and trailing spaces
                     current_q['options'].append(opt)
-                    current_q['correct'] = opt
+                    current_q['correct'].add(opt)  # Add to set of correct answers
                 elif opt_line.startswith('  ') and len(opt_line.strip()) > 0:
                     opt = opt_line[2:].rstrip()  # Remove leading "  " and trailing spaces
                     current_q['options'].append(opt)
@@ -281,10 +281,19 @@ def format_questions(questions):
         # Question text
         output_lines.append(q['text'])
         
-        # Options - mark correct answer with 'x', others with two spaces
-        correct_text = q.get('correct')
+        # Options - mark correct answers with 'x', others with two spaces
+        # Support multiple correct answers (multiple choice)
+        correct_options = q.get('correct', set())
+        if isinstance(correct_options, str):
+            # Backward compatibility: if it's a string, convert to set
+            correct_options = {correct_options}
+        elif not isinstance(correct_options, set):
+            # If it's None or other type, make it an empty set
+            correct_options = set()
+        
         for option in q['options']:
-            if correct_text and option.strip() == correct_text.strip():
+            # Check if this option is in the set of correct answers
+            if option.strip() in {opt.strip() for opt in correct_options}:
                 output_lines.append(f"x {option}")
             else:
                 output_lines.append(f"  {option}")
