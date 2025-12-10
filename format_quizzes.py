@@ -289,7 +289,8 @@ def format_questions(questions):
             else:
                 output_lines.append(f"  {option}")
     
-    return '\n'.join(output_lines)
+    # Join lines and ensure file ends with a newline
+    return '\n'.join(output_lines) + '\n'
 
 
 def process_quiz_file(filepath):
