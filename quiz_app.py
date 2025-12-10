@@ -4,6 +4,7 @@
 import os
 import random
 import sys
+from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Set
@@ -234,6 +235,52 @@ def shuffle_choices(question: Question) -> None:
     question.correct_indices = new_correct
 
 
+def show_summary(
+    total_correct: int,
+    total_asked: int,
+    stats_by_file: dict[str, dict[str, int]],
+    prefix: str | None = None,
+) -> None:
+    clear_screen()
+    if prefix:
+        print(color(prefix, Colors.RED))
+        print()
+
+    title = "Performance Summary"
+    print(color(title, Colors.BOLD + Colors.CYAN))
+    print(color("-" * len(title), Colors.CYAN))
+
+    if total_asked == 0:
+        print("No questions answered.")
+        return
+
+    pct = (total_correct / total_asked) * 100 if total_asked else 0.0
+    print(color(f"Total: {total_correct}/{total_asked} correct ({pct:.1f}%)", Colors.YELLOW))
+    print()
+
+    # Build table
+    headers = ["Quiz file", "Correct/Total", "Percent"]
+    name_width = max((len(fname) for fname in stats_by_file), default=len(headers[0]))
+    ct_width = len("Correct/Total")
+    pct_width = len("Percent")
+
+    def row(file_name: str, correct: int, total: int, percent: float) -> str:
+        return f"{file_name:<{name_width}}  {correct:>{ct_width-7}}/{total:<{ct_width-7}}  {percent:>{pct_width}.1f}%"
+
+    header_line = f"{headers[0]:<{name_width}}  {headers[1]:<{ct_width}}  {headers[2]:>{pct_width}}"
+    print(color(header_line, Colors.BOLD + Colors.CYAN))
+    print(color("-" * len(header_line), Colors.CYAN))
+
+    for fname in sorted(stats_by_file):
+        data = stats_by_file[fname]
+        t = data.get("total", 0)
+        c = data.get("correct", 0)
+        pct_file = (c / t) * 100 if t else 0.0
+        line = row(fname, c, t, pct_file)
+        line_color = Colors.GREEN if pct_file >= 70 else Colors.YELLOW if pct_file >= 50 else Colors.RED
+        print(color(line, line_color))
+
+
 def render_question(
     question: Question,
     pointer: int,
@@ -421,22 +468,45 @@ def main() -> None:
 
     random.shuffle(questions)
 
-    for idx, question in enumerate(questions):
-        user_correct, user_response = ask_question(
-            question, idx=idx, total=len(questions)
-        )
-        if user_correct is None:
-            print("\nExiting...")
-            break
+    total_correct = 0
+    total_asked = 0
+    stats_by_file: dict[str, dict[str, int]] = defaultdict(
+        lambda: {"correct": 0, "total": 0}
+    )
+    exit_message: str | None = None
 
-        show_feedback(
-            question,
-            bool(user_correct),
-            user_response,
-            idx=idx,
-            total=len(questions),
+    try:
+        for idx, question in enumerate(questions):
+            user_correct, user_response = ask_question(
+                question, idx=idx, total=len(questions)
+            )
+            if user_correct is None:
+                exit_message = "Exiting..."
+                break
+
+            total_asked += 1
+            stats_by_file[question.source]["total"] += 1
+            if user_correct:
+                total_correct += 1
+                stats_by_file[question.source]["correct"] += 1
+
+            show_feedback(
+                question,
+                bool(user_correct),
+                user_response,
+                idx=idx,
+                total=len(questions),
+            )
+            wait_for_continue()
+    except KeyboardInterrupt:
+        exit_message = "Quiz interrupted."
+    finally:
+        show_summary(
+            total_correct=total_correct,
+            total_asked=total_asked,
+            stats_by_file=stats_by_file,
+            prefix=exit_message,
         )
-        wait_for_continue()
 
 
 if __name__ == "__main__":
